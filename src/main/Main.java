@@ -15,19 +15,92 @@ public class Main {
     // Змінні
     public static String selectedWord = "";
     public static int wordLength = 5;
+    public static int maxErrors = 6;
 
+    public static Scanner scanner = new Scanner(System.in);
     public static List<String> words = new ArrayList<>();
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
 
-    //  Основна функція яка запускає інші функції відправляє println, отримує скани.
+    //  Стартове меню.
     public static void main(String[] args) {
-        getWordsFromFile();
-        getRandomWordFromList();
+        while (true) {
+            System.out.println("For start enter 1\nFor exit enter 2 ");
+            String choice = scanner.nextLine();
+
+            if (choice.equals("1")) {
+                startGame();
+            } else if (choice.equals("2")) {
+                System.out.println("Goodbye!");
+                break;
+            } else {
+                System.out.println("Enter 1 or 2 please.");
+            }
+
+        }
     }
 
+    //  Метод startGame. В ньому створюємо секретне слово та запускаємо ігровий цикл.
+    public static void startGame() {
+        getWordsFromFile();
+        getRandomWordFromList();
+        gameLoop();
+    }
 
-    //  Функція яка добуває слова із файлу і формує масив слів.
+    //  Метод gameLoop. В ньому цикл гри поки вона не завершиться : показуємо заштриховане слово,
+    //  запитуємо у користувача букву, перевіряємо введення, перевіряємо стан гри.
+    public static void gameLoop() {
+
+        List<Character> enteredLetters = new ArrayList<>();
+        String maskedWord = selectedWord.replaceAll("[a-z]", "_");
+        int errorCount = 0;
+
+        while (true) {
+            System.out.println("Current word: " + maskedWord);
+
+            // Перевірка на поразку.
+            if (errorCount >= maxErrors) {
+                System.out.println("Sorry! You Lose! Secret Word - " + selectedWord);
+                break;
+            }
+
+            // Перевірка на перемогу.
+            if (!maskedWord.contains("_")) {
+                System.out.println("Congratulation! You Win Secret Word - !" + selectedWord);
+                break;
+            }
+
+            // Запитуємо букву.
+            System.out.println("Enter a-z letter");
+            String input = scanner.nextLine();
+            if (input.length() != 1) {
+                System.out.println("Enter only one letter.");
+                continue;
+            }
+            char enteredLetter = input.charAt(0);
+
+            // Перевірка чи не повторюється буква.
+            if (isLetterAlreadyEntered(enteredLetters, enteredLetter)) {
+                System.out.println("You already enter that letter.");
+                continue;
+            }
+
+            // Додаємо букву до списку введених букв.
+            enteredLetters.add(enteredLetter);
+
+            if (selectedWord.contains(String.valueOf(enteredLetter))) {
+                System.out.println("That`s right! The letter is in the word.");
+                maskedWord = updateMaskedWord(selectedWord,maskedWord,enteredLetter);
+            } else {
+                errorCount++;
+                System.out.println("Error! The letter isn`t in the word. Error counter " + errorCount);
+            }
+
+        }
+
+    }
+
+    //  Метод який добуває слова із файлу і формує список слів.
     public static void getWordsFromFile() {
         String pathToWords = "src/resources/words.txt";
 
@@ -40,7 +113,7 @@ public class Main {
 
     }
 
-    //
+    // Метод який добуває випадкове слово зі списку слів.
     public static void getRandomWordFromList() {
         if (words.isEmpty()) {
             System.out.println("Words list is empty");
@@ -59,15 +132,26 @@ public class Main {
             }
         }
 
-         selectedWord = resultWord.replaceAll("\\s", "");
-         System.out.println("Random word: " + selectedWord);
+         selectedWord = resultWord.replaceAll("\\s", "").toLowerCase();
 
     }
-    //  Функція яка отримує із вводу букву і перевіряє чи коректний ввід.
-    //  Функція яка створює дві змінні : слово яке відгадуємо та слово яке повертаємо користувачу(заштриховане).
-    //  Функція яка отримує букву, передає її в масив букв.
-    //  Функція перевіряє, чи є ця буква в слові, якщо є, то в змінну із заштрихованим словом відкриваємо цю букву,
-    //  якщо ні, то кількість помилок +1, слово не змінюється.
-    //  Функція яка перевіряє чи закінчена гра(скільки помилок, заштрихованих букв).
 
+    //  Метод яка оновлює заштриховане слово.
+    public static String updateMaskedWord(String selectedWord, String maskedWord, char enteredLetter) {
+        StringBuilder updated = new StringBuilder(maskedWord);
+        for (int i = 0; i <selectedWord.length(); i++) {
+            if (selectedWord.charAt(i) == enteredLetter){
+                updated.setCharAt(i, enteredLetter);
+            }
+        }
+        return updated.toString();
+    }
+
+    // Метод який перевіряє чи вже введена буква.
+    public static boolean isLetterAlreadyEntered(List<Character> enteredLetters, char enteredLetter) {
+        if (enteredLetters.contains(enteredLetter)) {
+            return true;
+        }
+        return false;
+    }
 }
