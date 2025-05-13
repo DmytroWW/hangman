@@ -22,7 +22,7 @@ mistakes exceeds the limit.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/hangman-game.git
+   git clone https://github.com/DmytroWW/hangman.git
 ````
 
 2. Navigate to the project directory:
